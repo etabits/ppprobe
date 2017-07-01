@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "node-ssh": "^4.2.2",
+    "telnet-client": "^0.14.0"
+  }
+}
