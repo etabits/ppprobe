@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 'use strict'
-const telnet = require('telnet-client')
 const Prober = require('./Prober')
 const Connection = require('./Connection')
 
@@ -10,10 +9,12 @@ var opts = {
   username,
   password,
   host: connectionParams.hostname,
-  port: connectionParams.port,
   maxLoss: process.env.LOSS || 7,
   maxPing: process.env.PING || 150,
   protocol: connectionParams.protocol.split(':')[0],
+}
+if (connectionParams.port) {
+  opts.port = connectionParams.port
 }
 if (opts.protocol=='ssh') {
   opts.privateKey = process.argv[3]
