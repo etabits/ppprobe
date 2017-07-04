@@ -31,7 +31,9 @@ class Prober {
       clearInterval(i)
       write(`: loss=${res.loss}%, avg=${res.avg}ms `)
       if (res.avg <= self.opts.maxPing && res.loss <= self.opts.maxLoss) {
-        return write('(acceptable, exiting!)\n')
+        write('(acceptable, exiting!)\n')
+        if (self.conn) self.conn.exec('exit')
+        return
       }
       write('\n')
       return self.acquireConnection()
@@ -68,8 +70,8 @@ class Prober {
     var self = this
     console.log('establishing connection to the router...')
     var c = this.conn = new Connection(this.opts)
-    return c.connect().then(function (conn) {
-      return conn.exec('cat /var/tmp/ppp0.conf').then(function (cmd) {
+    return c.connect().then(function () {
+      return c.exec('cat /var/tmp/ppp0.conf').then(function (cmd) {
         self.pppCmd = cmd.replace('nodetach', 'updetach').replace('&', '').trim()
       })
     }).then(()=>c)
