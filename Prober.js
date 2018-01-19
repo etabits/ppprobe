@@ -1,5 +1,6 @@
 'use strict'
-const exec = require('util').promisify(require('child_process').execFile)
+const { spawn } = require('child_process')
+const readline = require('readline')
 const Connection = require('./Connection')
 
 var Parser = require('expr-eval').Parser;
@@ -41,10 +42,8 @@ class Prober {
   round () {
     var self = this
     write('checking ping')
-    var i = setInterval(()=>write('.'), 1e3)
     return this.checkPing()
     .then(function(res) {
-      clearInterval(i)
       write(`: loss=${res.loss}%, avg=${res.avg}ms `)
       if (self.acceptable(res)) {
         write('(acceptable, exiting!)\n')
@@ -70,16 +69,46 @@ class Prober {
   }
 
   checkPing (count=65, target='8.8.8.8') {
-    return exec('ping', ['-q', '-i', '0.2', '-c', count, target]).then(function(res) {
-      var loss, avg
-      try {
-        loss = parseInt(res.stdout.match(/(\d+)% packet loss/)[1])
-        avg = parseFloat(res.stdout.match(/min\/avg\/max\/mdev = ([0-9.]+)\/([0-9.]+)/)[2])
-      } catch (e) {
-        console.log(e, res)
+    return new Promise(function (resolve, reject) {
+      var ping = spawn('ping', ['-O', '-n', '-i', '0.2', '-c', count, target])
+      var rl = readline.createInterface({input: ping.stdout})
+      var stats = {
+        total: 0,
+        reply: 0,
+        times: 0,
+        avg: Infinity
       }
-      return {loss, avg}
-    }).catch(()=>({loss:100,avg:Infinity}))
+      var unparsedLines = ''
+      rl.on('line', function (line) {
+        var info = {};
+        line.replace(/(\w+)=(\d+)/g, function (all, label, val) {
+          info[label] = parseFloat(val)
+        })
+        if (typeof info.icmp_seq == 'undefined') {
+          unparsedLines += line + '\n'
+          return;
+        } if (info.ttl) { // reply
+          stats.reply++
+          stats.times += info.time
+        }
+        stats.total = Math.max(stats.total, info.icmp_seq)
+        stats.avg = stats.times / stats.reply
+        stats.loss = 100-(stats.reply*100/stats.total)
+        write(`  \r${stats.reply}/${stats.total} @ ${stats.avg.toFixed(2)}ms (${Math.round(stats.loss)}% loss)`)
+      })
+      ping.on('exit', function () {
+        var loss, avg
+        try {
+          loss = parseInt(unparsedLines.match(/(\d+)% packet loss/)[1])
+          avg = parseFloat(unparsedLines.match(/min\/avg\/max\/mdev = ([0-9.]+)\/([0-9.]+)/)[2])
+        } catch (e) {
+          resolve({loss:100,avg:Infinity})
+          return;
+        }
+
+        resolve({loss, avg})
+      })
+    });
   }
 
 
