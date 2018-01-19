@@ -20,14 +20,9 @@ class Prober {
     this.opts = opts
     this.parser = new Parser();
     this.expr = this.parser.parse(this.opts.formula)
-    console.log(({
-      ping: 3,
-      loss: 3
-    }))
   }
 
   fix() {
-    console.log(this.opts)
     return this.round()
   }
 

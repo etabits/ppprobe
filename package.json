@@ -3,5 +3,26 @@
     "expr-eval": "^1.2.1",
     "node-ssh": "^4.2.2",
     "telnet-client": "^0.14.0"
-  }
+  },
+  "name": "ppprobe",
+  "description": "Drops and reconnects router's PPP connection until certain conditions are met (packet loss and ping time)",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/etabits/ppprobe.git"
+  },
+  "bin": "index.js",
+  "keywords": [
+    "pppd",
+    "router",
+    "connection",
+    "ping"
+  ],
+  "author": "Hasan Arous <arous.hasan@gmail.com> (http://www.etabits.com/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/etabits/ppprobe/issues"
+  },
+  "homepage": "https://github.com/etabits/ppprobe#readme"
 }
