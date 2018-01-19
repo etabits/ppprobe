@@ -9,15 +9,15 @@ var opts = {
   username,
   password,
   host: connectionParams.hostname,
-  maxLoss: process.env.LOSS || 7,
-  maxPing: process.env.PING || 150,
+
+  formula: process.argv[3] || '(ping + loss * 10) < 150',
   protocol: connectionParams.protocol.split(':')[0],
 }
 if (connectionParams.port) {
   opts.port = connectionParams.port
 }
 if (opts.protocol=='ssh') {
-  opts.privateKey = process.argv[3]
+  opts.privateKey = process.env.ROUTER_PK
 }
 var cp = new Prober(opts)
 cp.fix()

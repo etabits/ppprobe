@@ -2,6 +2,8 @@
 const exec = require('util').promisify(require('child_process').execFile)
 const Connection = require('./Connection')
 
+var Parser = require('expr-eval').Parser;
+
 function write(str) {
   process.stdout.write(str)
 }
@@ -15,11 +17,25 @@ function wait(seconds) {
 class Prober {
   constructor(opts) {
     this.opts = opts
+    this.parser = new Parser();
+    this.expr = this.parser.parse(this.opts.formula)
+    console.log(({
+      ping: 3,
+      loss: 3
+    }))
   }
 
   fix() {
     console.log(this.opts)
     return this.round()
+  }
+
+  acceptable(res) {
+    var self = this
+    return this.expr.evaluate({
+      ping: res.avg,
+      loss: res.loss
+    })
   }
 
   round () {
@@ -30,9 +46,11 @@ class Prober {
     .then(function(res) {
       clearInterval(i)
       write(`: loss=${res.loss}%, avg=${res.avg}ms `)
-      if (res.avg <= self.opts.maxPing && res.loss <= self.opts.maxLoss) {
+      if (self.acceptable(res)) {
         write('(acceptable, exiting!)\n')
-        if (self.conn) self.conn.exec('exit')
+        if (self.conn) self.conn.exec('exit').then(function () {
+          console.log('exited')
+        })
         return
       }
       write('\n')
@@ -61,7 +79,7 @@ class Prober {
         console.log(e, res)
       }
       return {loss, avg}
-    }).catch(()=>({loss:100,avg:999}))
+    }).catch(()=>({loss:100,avg:Infinity}))
   }
 
 
