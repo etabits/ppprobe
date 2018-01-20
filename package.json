@@ -7,13 +7,18 @@
   },
   "name": "ppprobe",
   "description": "Drops and reconnects router's PPP connection until certain conditions are met (packet loss and ping time)",
-  "version": "1.0.0",
+  "version": "1.0.0-beta.3",
   "main": "index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/etabits/ppprobe.git"
   },
   "bin": "index.js",
+  "files": [
+    "Connection.js",
+    "Prober.js",
+    "index.js"
+  ],
   "keywords": [
     "pppd",
     "router",
