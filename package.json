@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "chalk": "^2.3.0",
     "expr-eval": "^1.2.1",
     "node-ssh": "^4.2.2",
     "telnet-client": "^0.14.0"

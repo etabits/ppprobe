@@ -4,9 +4,18 @@ const readline = require('readline')
 const Connection = require('./Connection')
 
 var Parser = require('expr-eval').Parser;
+const chalk = require('chalk')
 
 function write(str) {
   process.stdout.write(str)
+}
+
+function colorize(text, value, valmax, valmin=0, huemax=0, huemin=120) {
+  if (value > valmax) value = valmax;
+  else if (value < valmin) value = valmin;
+  var hue = (value-valmin)/(valmax-valmin) * (huemax-huemin) + huemin
+
+  return chalk.hsl(hue, 50, 50)(text)
 }
 
 function wait(seconds) {
@@ -89,7 +98,12 @@ class Prober {
         stats.total = Math.max(stats.total, info.icmp_seq)
         stats.avg = stats.times / stats.reply
         stats.loss = 100-(stats.reply*100/stats.total)
-        write(`  \r${stats.reply}/${stats.total} @ ${stats.avg.toFixed(2)}ms (${Math.round(stats.loss)}% loss)`)
+
+        write(`  \r${
+          colorize(Math.round(stats.loss), stats.loss, 30)
+        }% @ ${
+          colorize(stats.avg.toFixed(3), stats.avg, 150, 50)
+        }ms (${stats.reply}/${stats.total}/${count})`)
       })
       ping.on('exit', function () {
         var loss, avg
