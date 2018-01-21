@@ -15,7 +15,7 @@ function colorize(text, value, valmax, valmin=0, huemax=0, huemin=120) {
   else if (value < valmin) value = valmin;
   var hue = (value-valmin)/(valmax-valmin) * (huemax-huemin) + huemin
 
-  return chalk.hsl(hue, 50, 50)(text)
+  return chalk.hsl(hue, 88, 50)(text)
 }
 
 function wait(seconds) {
